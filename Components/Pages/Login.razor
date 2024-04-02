@@ -1,0 +1,56 @@
+﻿@page "/login"
+@using System.Security.Claims
+@using BlazorAuthFromScratch1.Models
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@inject NavigationManager NavigationManager
+
+<h1>Login</h1>
+
+<EditForm Model="LoginData" OnValidSubmit="HandleValidSubmit" FormName="LoginForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Username">Username</label>
+        <InputText id="Username" class="form-control" @bind-Value="LoginData!.Username" />
+        @* <ValidationMessage For="@(() => LoginData.Username)" /> *@
+    </div>
+
+    <div class="form-group mt-2">
+        <label for="Password">Password</label>
+        <InputText id="Password" class="form-control" type="password" @bind-Value="LoginData.Password" />
+        @* <ValidationMessage For="@(() => LoginData.Password)" /> *@
+    </div>
+    
+    <button type="submit" class="btn btn-primary mt-2">Login</button>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm] private LoginDto? LoginData { get; set; } = new();
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    private async Task HandleValidSubmit()
+    {
+        if (LoginData!.Username == "hermano" && LoginData.Password == "password")
+        {
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.Name, LoginData.Username),
+                new(ClaimTypes.Role, "Admin")
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+            
+            await HttpContext.SignInAsync(principal);
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            Console.WriteLine("Invalid login attempt");
+        }
+    }
+}

@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\BlazorAuthFromScratch1.props" />
+</Project>

@@ -1,0 +1,38 @@
+﻿@page "/counter"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p>Your name is @_userName</p>
+<p role="status">Current count: @_currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Increment</button>
+<button class="btn btn-success" @onclick="GetUserName">Get User Name</button>
+
+@code {
+    private int _currentCount = 0;
+    private string? _userName;
+    
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    private void IncrementCount()
+    {
+        _currentCount++;
+    }
+
+    private async Task GetUserName()
+    {
+        if (AuthState is not null)
+        {
+            var authState = await AuthState;
+            var user = authState.User;
+            _userName = user.Identity?.Name ?? "No user named";
+        }
+    }
+}
